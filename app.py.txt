@@ -1,0 +1,335 @@
+import streamlit as st
+import google.generativeai as genai
+import time
+import urllib.parse
+import random
+import re
+
+# ------------------------------------------------------------------
+# 1. Page Config & Style
+# ------------------------------------------------------------------
+st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layout="centered")
+
+# [NEW] 개발자 모드 (사이드바)
+with st.sidebar:
+    st.header("🛠️ Admin Tools")
+    dev_mode = st.checkbox("🔓 블러 해제 (X-Ray Mode)", value=False)
+
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #FFFFFF; color: #191F28; }
+    .stButton>button { width: 100%; border-radius: 12px; height: 50px; font-weight: 800; font-size: 16px; border: none; transition: 0.3s; }
+    .primary-btn>button { background-color: #F04452; color: white; }
+    .score-card { text-align: center; padding: 20px; border-radius: 15px; background: #f8f9fa; margin-bottom: 20px; border: 2px solid #e9ecef; }
+    
+    /* 블러 처리 스타일 */
+    .blur-content { filter: blur(5px); user-select: none; opacity: 0.6; pointer-events: none; }
+    /* 개발자 모드일 때 블러 제거 */
+    .no-blur { filter: none !important; opacity: 1 !important; pointer-events: auto !important; }
+    
+    .locked-box { position: relative; text-align: center; padding: 40px; background: #fff3cd; border: 2px dashed #ffc107; border-radius: 12px; margin-top: -100px; z-index: 10; }
+    div[role="radiogroup"] { justify-content: center; }
+    th, td { border-bottom: 1px solid #ddd; padding: 10px; }
+    </style>
+""", unsafe_allow_html=True)
+
+# ------------------------------------------------------------------
+# 2. API Connection
+# ------------------------------------------------------------------
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+except:
+    st.error("🚨 API Key Error. Check .streamlit/secrets.toml")
+    st.stop()
+
+# ------------------------------------------------------------------
+# 3. Data Decks
+# ------------------------------------------------------------------
+KR_IDEAS = [
+    "헤어진 연인의 사진에서 얼굴만 자연스럽게 지워주는 AI 지우개",
+    "층간소음이 발생하면 윗집에 자동으로 복수 음악을 트는 스피커",
+    "독서실에서 졸면 전기 충격을 주는 학습용 웨어러블 밴드",
+    "내가 산 주식이 떨어지면 욕해주고 위로해주는 AI 상담사",
+    "매일 아침 동기부여 명언 대신 '너 그러다 망한다'고 악담하는 알람 앱",
+    "소개팅 실패 시 식비의 50%를 보상해주는 데이팅 앱 보험",
+    "쓰레기 분리수거를 대신 해주는 로봇 구독 서비스",
+    "헬스장 안 가는 날마다 벌금을 걷어서 기부하는 스마트 워치 앱",
+    "내 기분에 맞춰서 자동으로 칵테일을 말아주는 홈바 로봇",
+    "잔소리하는 상사의 목소리를 실시간으로 묵음 처리해주는 이어폰",
+    "유통기한 임박한 편의점 도시락을 반값에 지도에 표시하는 앱",
+    "우리 동네 붕어빵 트럭 위치를 실시간으로 공유하는 대동붕어지도",
+    "코딩을 몰라도 말만 하면 앱을 만들어주는 노코드 툴 Genesis",
+    "탈모 진행 상황을 AI로 분석해서 가발을 미리 맞춰주는 서비스",
+    "결혼식 하객 대행 알바를 성향별(MBTI)로 매칭하는 플랫폼"
+]
+
+EN_IDEAS = [
+    "AI-powered eraser that removes your ex-lover from photos naturally.",
+    "Smart speaker that automatically plays revenge music when upstairs neighbors are noisy.",
+    "Wearable band that gives electric shocks if you fall asleep in the library.",
+    "AI therapist that roasts you when your stocks plummet.",
+    "Alarm app that wakes you up with insults instead of motivational quotes.",
+    "Dating app insurance that refunds 50% of meal costs if the date fails.",
+    "Robot subscription service that handles recycling and trash sorting.",
+    "Smartwatch app that donates your money to charity every time you skip the gym.",
+    "Home bar robot that mixes cocktails automatically based on your mood.",
+    "Noise-canceling earphones that mute your boss's nagging in real-time.",
+    "Map app showing half-price convenience store food nearing expiration.",
+    "Community map sharing real-time locations of street food trucks.",
+    "No-code tool Genesis that builds apps just by listening to your voice.",
+    "AI service that predicts hair loss and custom-fits wigs in advance.",
+    "Platform matching fake wedding guests based on MBTI personalities."
+]
+
+if 'user_input' not in st.session_state:
+    st.session_state.user_input = ""
+
+# ------------------------------------------------------------------
+# 4. Helper Functions
+# ------------------------------------------------------------------
+def pick_random_idea(lang):
+    target_deck = KR_IDEAS if lang == 'ko' else EN_IDEAS
+    st.session_state.user_input = random.choice(target_deck)
+
+def get_ui_text(lang_code):
+    text_pack = {
+        "ko": {
+            "main_title": "Genesis 🔥",
+            "sub_title": "AI가 당신의 사업 아이디어를 팩트로 폭행합니다.<br>멘탈 약한 분은 뒤로 가세요.",
+            "input_label": "사업/유튜브/웹소설 아이디어를 입력하세요",
+            "input_placeholder": "예: 직장인들을 위한 점심 메뉴 추천 구독 서비스",
+            "analyze_btn": "🔥 팩트 폭력 당하기 (분석)",
+            "random_btn": "🎲 예시 아이디어 넣기",
+            "warning": "아이디어를 입력해야 팰 수 있습니다.",
+            "connecting": "🧠 Genesis Brain 접속 중...",
+            "analyzing": "🔍 아이디어 해부 중...",
+            "calculating": "💰 수익 모델 계산 중...",
+            "score_title": "생존 확률",
+            "tab_free": "🔥 팩트 폭력 (무료)",
+            "tab_paid": "📊 심층 리포트 (Premium)",
+            "roast_title": "💀 왜 망하는가?",
+            "share_btn": "🐦 트위터로 공유하기",
+            "share_msg": "내 사업 아이디어 점수: {score}점 ㅋㅋㅋ\nAI가 '{one_liner}'라고 함.\n너도 당해봐라 👉",
+            "info_msg": "💡 이 탭은 당신이 '살아남을 방법'을 알려줍니다.",
+            "swot_title": "1. SWOT 분석",
+            "money_title": "2. 💰 구체적 수익화 모델 (Top 3)",
+            "survival_title": "3. 🛡️ 유일한 생존 전략",
+            "lock_title": "🔓 리포트 전체 잠금 해제",
+            "lock_desc": "당신의 아이디어를 살릴 <b>구체적인 생존 전략</b>과 <b>수익 모델</b>이 숨겨져 있습니다.",
+            "price": "단돈 4,900원 (커피 한 잔 값)",
+            "unlock_btn": "👉 지금 해제하고 생존하기",
+            "prompt_lang_instruction": "Output must be in KOREAN."
+        },
+        "en": {
+            "main_title": "Genesis 🔥",
+            "sub_title": "AI roasts your business idea with brutal facts.<br>Weak hearts, please leave.",
+            "input_label": "Enter your Startup / YouTube / Novel idea",
+            "input_placeholder": "e.g., Subscription lunch service for office workers",
+            "analyze_btn": "🔥 Roast My Idea",
+            "random_btn": "🎲 Random Idea",
+            "warning": "Please enter an idea to get roasted.",
+            "connecting": "🧠 Connecting to Genesis Brain...",
+            "analyzing": "🔍 Analyzing Idea...",
+            "calculating": "💰 Calculating Revenue...",
+            "score_title": "Success Rate",
+            "tab_free": "🔥 Roast (Free)",
+            "tab_paid": "📊 Deep Report (Premium)",
+            "roast_title": "💀 Brutal Feedback",
+            "share_btn": "🐦 Share on X (Twitter)",
+            "share_msg": "My Business Score: {score}/100 💀\nAI said: '{one_liner}'\nTry here 👉",
+            "info_msg": "💡 This tab reveals how to survive.",
+            "swot_title": "1. SWOT Analysis",
+            "money_title": "2. 💰 Monetization Strategy",
+            "survival_title": "3. 🛡️ Survival Strategy",
+            "lock_title": "🔓 Unlock Full Report",
+            "lock_desc": "Get the <b>Survival Strategy</b> & <b>Revenue Model</b> to save this idea.",
+            "price": "Only $4.90",
+            "unlock_btn": "👉 Unlock Now",
+            "prompt_lang_instruction": "Output must be in ENGLISH."
+        }
+    }
+    return text_pack[lang_code]
+
+# ------------------------------------------------------------------
+# 5. UI Layout
+# ------------------------------------------------------------------
+col_lang1, col_lang2, col_lang3 = st.columns([1, 2, 1])
+with col_lang2:
+    lang_choice = st.radio("언어 선택 / Select Language", ["🇰🇷 한국어", "🇺🇸 English"], horizontal=True, label_visibility="collapsed")
+
+current_lang = "ko" if "한국어" in lang_choice else "en"
+ui = get_ui_text(current_lang)
+
+st.markdown(f'<div style="font-size: 36px; font-weight: 800; color: #191F28; margin-bottom: 5px; text-align: center;">{ui["main_title"]}</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="font-size: 16px; color: #8B95A1; margin-bottom: 30px; text-align: center;">{ui["sub_title"]}</div>', unsafe_allow_html=True)
+
+user_text = st.text_area(ui["input_label"], height=120, placeholder=ui["input_placeholder"], key="user_input")
+
+col1, col2 = st.columns([1, 1])
+with col1:
+    analyze_btn = st.button(ui["analyze_btn"], type="primary")
+with col2:
+    st.button(ui["random_btn"], on_click=pick_random_idea, args=(current_lang,))
+
+# ------------------------------------------------------------------
+# 6. Analysis Engine
+# ------------------------------------------------------------------
+if analyze_btn:
+    if not user_text:
+        st.warning(ui["warning"])
+    else:
+        status_box = st.status(ui["connecting"], expanded=True)
+        progress_bar = status_box.progress(0)
+        
+        try:
+            model_name = "gemini-2.5-flash"
+            generation_config = {"temperature": 0.0, "max_output_tokens": 8192}
+            
+            model = genai.GenerativeModel(model_name, generation_config=generation_config)
+            progress_bar.progress(30)
+            status_box.write(ui["analyzing"])
+            
+            prompt = f"""
+            You are Genesis, a cynical VC.
+            [User Idea]: "{user_text}"
+            
+            [Task]: Analyze this idea.
+            [CRITICAL RULE]: {ui['prompt_lang_instruction']}
+            (Ignore the input language, follow the USER SELECTED language: {current_lang})
+            
+            [Content Rules]:
+            - NO GENERIC ADVICE (e.g., "Hire a marketing team", "Make a good UI").
+            - Focus on SPECIFIC RISKS (e.g., "Competitor X has 90% market share", "Legal regulation Y will kill this").
+            - Be sharp, brutal, but logical.
+            
+            [Scoring Rules]:
+            - Clear potential? High Score (75-95).
+            - Vague/Bad? Low Score (0-50).
+            - Tone: Cynical & Brutal.
+            
+            [Output Format]:
+            Use these EXACT separators.
+            
+            [[[SCORE]]]
+            (Number 0-100 only)
+            
+            [[[ONE_LINER]]]
+            (Short witty punchline)
+            
+            [[[FEEDBACK]]]
+            (3 paragraphs of brutal feedback)
+            
+            [[[SWOT]]]
+            (MUST BE A MARKDOWN TABLE. No text paragraphs. Format: | Category | Description |)
+            
+            [[[MONETIZATION]]]
+            (3 concrete ways)
+            
+            [[[SURVIVAL]]]
+            (The ONLY way to survive)
+            """
+            
+            response = model.generate_content(prompt)
+            progress_bar.progress(80)
+            status_box.write(ui["calculating"])
+            
+            content = response.text
+            
+            parsed_data = {
+                "SCORE": "", "ONE_LINER": "", "FEEDBACK": "", 
+                "SWOT": "", "MONETIZATION": "", "SURVIVAL": ""
+            }
+            
+            current_section = None
+            lines = content.split('\n')
+            
+            for line in lines:
+                upper_line = line.upper()
+                if "[[[SCORE" in upper_line: current_section = "SCORE"
+                elif "[[[ONE_LINER" in upper_line: current_section = "ONE_LINER"
+                elif "[[[FEEDBACK" in upper_line: current_section = "FEEDBACK"
+                elif "[[[SWOT" in upper_line: current_section = "SWOT"
+                elif "[[[MONETIZATION" in upper_line or "[[[MONEY" in upper_line: current_section = "MONETIZATION"
+                elif "[[[SURVIVAL" in upper_line: current_section = "SURVIVAL"
+                else:
+                    if current_section:
+                        parsed_data[current_section] += line + "\n"
+
+            score_text = parsed_data["SCORE"].strip()
+            score_match = re.findall(r'\d+', score_text)
+            score = int(score_match[0]) if score_match else 0
+            
+            one_liner = parsed_data["ONE_LINER"].strip() or "Analyzing..."
+            feedback = parsed_data["FEEDBACK"].strip() or "Feedback unavailable."
+            swot = parsed_data["SWOT"].strip() or "SWOT unavailable."
+            money = parsed_data["MONETIZATION"].strip() or "Monetization unavailable."
+            survival = parsed_data["SURVIVAL"].strip() or "Survival plan unavailable."
+
+            progress_bar.progress(100)
+            status_box.update(label="Complete!", state="complete", expanded=False)
+            
+            # Result Display
+            st.divider()
+            
+            st.markdown(f"""
+            <div class="score-card">
+                <h2 style='margin:0; color:#888;'>{ui['score_title']}</h2>
+                <h1 style='font-size:60px; margin:0; color:{"#F04452" if score < 70 else "#00C853"};'>{score}%</h1>
+                <p style='font-size:18px; font-weight:bold;'>"{one_liner}"</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            tab1, tab2 = st.tabs([ui['tab_free'], ui['tab_paid']])
+            
+            with tab1:
+                st.subheader(ui['roast_title'])
+                st.write(feedback)
+                st.markdown("---")
+                
+                final_share_text = urllib.parse.quote(ui['share_msg'].format(score=score, one_liner=one_liner))
+                
+                st.markdown(f"""
+                <a href="https://twitter.com/intent/tweet?text={final_share_text}&url=https://genesis-mvp.streamlit.app" target="_blank">
+                    <button style='background:#1DA1F2; color:white; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer;'>
+                        {ui['share_btn']}
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+
+            with tab2:
+                # [NEW] 개발자 모드 체크 여부에 따라 블러 클래스 결정
+                blur_class = "blur-content" if not dev_mode else "no-blur"
+                
+                st.info(ui['info_msg'])
+                st.markdown(f"### {ui['swot_title']}")
+                st.markdown(swot)
+                st.markdown("---")
+                
+                st.markdown(f"### {ui['money_title']}")
+                # 블러 처리된 부분에 blur_class 적용
+                st.markdown(f'<div class="{blur_class}">{money}</div>', unsafe_allow_html=True)
+                
+                st.markdown(f"### {ui['survival_title']}")
+                # 블러 처리된 부분에 blur_class 적용
+                st.markdown(f'<div class="{blur_class}">{survival}</div>', unsafe_allow_html=True)
+                
+                # 잠금 상자 (개발자 모드일 때는 숨기고 싶다면 if not dev_mode: 로 감싸면 됨. 
+                # 일단은 블러가 풀려도 '결제 유도 박스'가 위에 떠 있는 구조이므로, 
+                # X-ray처럼 뒤가 비쳐 보이는지 확인하시면 됩니다.)
+                st.markdown(f"""
+                <div class="locked-box">
+                    <h2>{ui['lock_title']}</h2>
+                    <p>{ui['lock_desc']}</p>
+                    <p style='color:#F04452; font-weight:bold;'>{ui['price']}</p>
+                    <a href="https://toss.me/YOUR_ID" target="_blank">
+                        <button style='background:#28a745; color:white; border:none; padding:15px 30px; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer; width:100%;'>
+                            {ui['unlock_btn']}
+                        </button>
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
