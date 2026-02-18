@@ -10,8 +10,8 @@ import re
 # ------------------------------------------------------------------
 st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layout="centered")
 
-# [🔥 Step 4: 마지막 테스트를 위한 개발자 모드 ON 🔥]
-dev_mode = True 
+# [🔥 Step 4: 실전 배포를 위한 개발자 모드 OFF (결제창 철벽 가동) 🔥]
+dev_mode = False 
 
 KAKAO_LINK = "https://bit.ly/3MavCUX"
 BMC_LINK = "https://bit.ly/4rpRfQw"
@@ -458,6 +458,6 @@ st.markdown("---")
 st.markdown("""
     <div style="text-align: center; color: #666; font-size: 12px; padding-bottom: 50px;">
         <p>Copyright © 2026 Genesis AI. All rights reserved.</p>
-        <p>Contact: <a href="mailto:your_email@gmail.com" style="color: #888;">your_email@gmail.com</a></p>
+        <p>Contact: <a href="mailto:seotony77@gmail.com" style="color: #888;">seotony77@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)

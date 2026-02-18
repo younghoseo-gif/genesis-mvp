@@ -6,7 +6,7 @@ import random
 import re
 
 # ------------------------------------------------------------------
-# 1. Page Config & 철벽 테마 방어
+# 1. Page Config & 철벽 테마 방어 (보호색 버그 완벽 차단)
 # ------------------------------------------------------------------
 st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layout="centered")
 
@@ -52,10 +52,35 @@ st.markdown("""
     th { background-color: #21262D !important; color: #00FFD1 !important; font-size: 16px !important; text-align: left !important; padding: 12px !important; border-bottom: 2px solid #444 !important; }
     td { font-size: 15px !important; padding: 15px 12px !important; border-bottom: 1px solid #333 !important; vertical-align: top !important; line-height: 1.6 !important; }
 
-    .stButton>button { width: 100%; border-radius: 8px; height: 55px; font-weight: 800; font-size: 18px; border: none; transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; }
-    .stButton>button:active { transform: scale(0.98); }
-    .primary-btn button { background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%); color: white !important; }
-    .secondary-btn button { background-color: #21262D; color: #00FFD1 !important; border: 1px solid #30363D; }
+    /* --- [수정됨] 버튼 및 입력창 보호색 완벽 방어 --- */
+    div.stButton > button { 
+        width: 100% !important; 
+        border-radius: 8px !important; 
+        height: 55px !important; 
+        font-weight: 800 !important; 
+        font-size: 18px !important; 
+        transition: all 0.3s ease !important; 
+        font-family: 'JetBrains Mono', monospace !important; 
+    }
+    div.stButton > button:active { transform: scale(0.98) !important; }
+    
+    div.primary-btn div.stButton > button { 
+        background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%) !important; 
+        color: #ffffff !important; 
+        border: none !important;
+    }
+    div.secondary-btn div.stButton > button { 
+        background-color: #21262D !important; 
+        color: #00FFD1 !important; 
+        border: 1px solid #30363D !important; 
+    }
+    
+    /* 텍스트 입력창(Text Area) 글씨 안 보이는 현상 방지 */
+    .stTextArea textarea {
+        background-color: #161B22 !important;
+        color: #ffffff !important;
+        border: 1px solid #30363D !important;
+    }
 
     .score-card { text-align: center; padding: 30px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 30px; }
 
