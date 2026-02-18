@@ -6,7 +6,7 @@ import random
 import re
 
 # ------------------------------------------------------------------
-# 1. Page Config & 철벽 테마 방어 (보호색 버그 완벽 차단)
+# 1. Page Config & 철벽 테마 방어
 # ------------------------------------------------------------------
 st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layout="centered")
 
@@ -14,6 +14,7 @@ st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layou
 dev_mode = False 
 
 KAKAO_LINK = "https://bit.ly/3MavCUX"
+# [최종 복구 완료] 보스의 오리지널 BuyMeACoffee 단축 URL로 완벽 복구되었습니다.
 BMC_LINK = "https://bit.ly/4rpRfQw"
 
 st.markdown("""
@@ -52,35 +53,11 @@ st.markdown("""
     th { background-color: #21262D !important; color: #00FFD1 !important; font-size: 16px !important; text-align: left !important; padding: 12px !important; border-bottom: 2px solid #444 !important; }
     td { font-size: 15px !important; padding: 15px 12px !important; border-bottom: 1px solid #333 !important; vertical-align: top !important; line-height: 1.6 !important; }
 
-    /* --- [수정됨] 버튼 및 입력창 보호색 완벽 방어 --- */
-    div.stButton > button { 
-        width: 100% !important; 
-        border-radius: 8px !important; 
-        height: 55px !important; 
-        font-weight: 800 !important; 
-        font-size: 18px !important; 
-        transition: all 0.3s ease !important; 
-        font-family: 'JetBrains Mono', monospace !important; 
-    }
-    div.stButton > button:active { transform: scale(0.98) !important; }
-    
-    div.primary-btn div.stButton > button { 
-        background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%) !important; 
-        color: #ffffff !important; 
-        border: none !important;
-    }
-    div.secondary-btn div.stButton > button { 
-        background-color: #21262D !important; 
-        color: #00FFD1 !important; 
-        border: 1px solid #30363D !important; 
-    }
-    
-    /* 텍스트 입력창(Text Area) 글씨 안 보이는 현상 방지 */
-    .stTextArea textarea {
-        background-color: #161B22 !important;
-        color: #ffffff !important;
-        border: 1px solid #30363D !important;
-    }
+    /* 버튼 및 텍스트 박스 보호색 방어 */
+    div.stButton > button { width: 100%; border-radius: 8px; height: 55px; font-weight: 800; font-size: 18px; border: none; transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; }
+    div.stButton > button:active { transform: scale(0.98); }
+    .primary-btn button { background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%); color: white !important; }
+    .secondary-btn button { background-color: #21262D; color: #00FFD1 !important; border: 1px solid #30363D; }
 
     .score-card { text-align: center; padding: 30px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 30px; }
 
@@ -115,7 +92,7 @@ KR_IDEAS = [
     "비트코인 차트 보면서 롤러코스터 타는 VR 게임", "내 성대모사 퀄리티 평가해주는 오디션 앱", "길 가다 마주친 강아지 품종 알려주는 안경", "자취생 엄마 잔소리 구독 서비스", "엘리베이터 버튼 발로 누르게 해주는 페달",
     "지하철 옆사람 어깨에 기대면 전기 충격 주는 패드", "화장실 휴지 떨어지면 드론으로 배달해주는 서비스", "노래 못 부르면 예약 취소되는 코인노래방", "내 유언장 블록체인에 영구 박제하는 서비스", "못생긴 사진만 골라서 지워주는 갤러리 정리 AI",
     "친구한테 돈 빌려주고 안 갚으면 카톡 프사 자동으로 바꾸는 앱", "헬스장 기구 사용법 모르면 홀로그램으로 알려주는 AR", "편의점 알바생 진상 손님 퇴치용 사이렌", "내 얼굴로 이모티콘 1초 만에 만드는 생성기", "소개팅 앱 사진이랑 실물 다르면 환불해주는 보험",
-    "나랑 똑같이 생긴 도플갱어 찾아주는 전 세계 검색 엔진", "맛없는 식당 가면 '맛없음' 깃발 꽂는 지도", "내 흑역사 자동으로 발굴해서 이불킥 하게 만드는 알람", "공부 안 하고 폰 만지면 전기 오르는 스마트폰 케이스", "내 반려동물이랑 대화 가능한 뇌파 번역기",
+    "나랑 똑같이 생긴 도플갱어 찾아주는 전 전 세계 검색 엔진", "맛없는 식당 가면 '맛없음' 깃발 꽂는 지도", "내 흑역사 자동으로 발굴해서 이불킥 하게 만드는 알람", "공부 안 하고 폰 만지면 전기 오르는 스마트폰 케이스", "내 반려동물이랑 대화 가능한 뇌파 번역기",
     "잠수 이별 당하면 상대방 회사에 화환 보내주는 서비스", "SNS 허세 사진 감별해주는 팩트체크 AI", "혼밥할 때 앞에 앉아서 같이 먹어주는 홀로그램 아이돌", "비 오는 날 우산 없이 뛰는 사람들 등수 매기는 스포츠", "지각 핑계 100가지 만들어주는 AI 생성기",
     "내 기분에 맞춰서 칵테일 제조해주는 텀블러", "월급날 1초 만에 스쳐 지나가는 돈 시각화해주는 AR", "상사 뒷담화하면 자동으로 익명 게시판에 올려주는 앱", "코인 노래방 점수 내기로 밥값 계산하는 결제 시스템", "내 묘비에 QR코드 박아서 인스타 링크 거는 서비스",
     "책 읽다 잠들면 자동으로 불 꺼주고 책갈피 꽂아주는 로봇", "운전 중 욱하면 차 안에서 클래식 틀어주는 내비게이션", "냉장고 유통기한 임박한 재료로 요리 대결하는 앱", "내 발 냄새 수치 측정해서 양말 교체 알림 주는 신발", "회의 중 딴짓하다 질문 받으면 답변 대신 해주는 AI",
@@ -269,7 +246,6 @@ if analyze_btn:
             progress_bar.progress(30)
             status_box.write(ui["analyzing"])
             
-            # [🔥 핵심 변경: 프롬프트를 언어별로 100% 완전 분리]
             if current_lang == "ko":
                 prompt = f"""
                 당신은 실리콘밸리의 가장 냉혹하고 파괴적인 비즈니스 컨설턴트(Genesis)입니다. 
@@ -409,11 +385,12 @@ if st.session_state.analyzed:
     
     st.divider()
     
+    # CSS 우선순위 버그를 피하기 위해 h1 태그 대신 div 태그를 사용하여 강제 빨간색 주입
     score_color = "#FF4B4B" if score < 50 else "#00FFD1"
     st.markdown(f"""
     <div class="score-card">
         <h2 style='margin:0; color:#8B949E !important; border:none;'>{ui['score_title']}</h2>
-        <h1 style='font-size:72px; margin:10px 0; color:{score_color} !important;'>{score}%</h1>
+        <div style='font-family:"JetBrains Mono", monospace; font-size:72px; font-weight:bold; margin:10px 0; color:{score_color} !important;'>{score}%</div>
         <p style='font-size:20px; font-weight:bold; color:#FFFFFF; word-break: keep-all !important;'>"{data['one_liner']}"</p>
     </div>
     """, unsafe_allow_html=True)
