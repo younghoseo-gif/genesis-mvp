@@ -14,7 +14,6 @@ st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layou
 dev_mode = False 
 
 KAKAO_LINK = "https://bit.ly/3MavCUX"
-# [최종 복구 완료] 보스의 오리지널 BuyMeACoffee 단축 URL로 완벽 복구되었습니다.
 BMC_LINK = "https://bit.ly/4rpRfQw"
 
 st.markdown("""
@@ -59,6 +58,10 @@ st.markdown("""
     .primary-btn button { background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%); color: white !important; }
     .secondary-btn button { background-color: #21262D; color: #00FFD1 !important; border: 1px solid #30363D; }
 
+    /* [🔥 버그 수정] 점수 전용 클래스를 만들어 글로벌 CSS 강제 덮어쓰기 */
+    .score-red { color: #FF4B4B !important; }
+    .score-green { color: #00FFD1 !important; }
+
     .score-card { text-align: center; padding: 30px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 30px; }
 
     .final-gatekeeper-box { width: 100%; text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(20,20,20,1) 0%, rgba(10,10,10,1) 100%); border: 2px solid #F04452; border-radius: 16px; box-shadow: 0 10px 30px rgba(240, 68, 82, 0.15); margin-top: 20px; margin-bottom: 30px; position: relative; z-index: 100; }
@@ -74,7 +77,7 @@ except:
     st.stop()
 
 # ------------------------------------------------------------------
-# 2. Data Decks (풀 데이터 100개씩)
+# 2. Data Decks
 # ------------------------------------------------------------------
 KR_IDEAS = [
     "헤어진 연인 사진 속 얼굴만 자연스럽게 지워주는 AI", "층간소음 발생 시 윗집 스피커 해킹하는 복수 앱", "주식 폭락할 때마다 욕해주는 위로 AI", "직장 상사 잔소리를 클래식 음악으로 변환하는 이어폰", "헬스장 안 가면 등록비가 자동으로 기부되는 시계",
@@ -92,7 +95,7 @@ KR_IDEAS = [
     "비트코인 차트 보면서 롤러코스터 타는 VR 게임", "내 성대모사 퀄리티 평가해주는 오디션 앱", "길 가다 마주친 강아지 품종 알려주는 안경", "자취생 엄마 잔소리 구독 서비스", "엘리베이터 버튼 발로 누르게 해주는 페달",
     "지하철 옆사람 어깨에 기대면 전기 충격 주는 패드", "화장실 휴지 떨어지면 드론으로 배달해주는 서비스", "노래 못 부르면 예약 취소되는 코인노래방", "내 유언장 블록체인에 영구 박제하는 서비스", "못생긴 사진만 골라서 지워주는 갤러리 정리 AI",
     "친구한테 돈 빌려주고 안 갚으면 카톡 프사 자동으로 바꾸는 앱", "헬스장 기구 사용법 모르면 홀로그램으로 알려주는 AR", "편의점 알바생 진상 손님 퇴치용 사이렌", "내 얼굴로 이모티콘 1초 만에 만드는 생성기", "소개팅 앱 사진이랑 실물 다르면 환불해주는 보험",
-    "나랑 똑같이 생긴 도플갱어 찾아주는 전 전 세계 검색 엔진", "맛없는 식당 가면 '맛없음' 깃발 꽂는 지도", "내 흑역사 자동으로 발굴해서 이불킥 하게 만드는 알람", "공부 안 하고 폰 만지면 전기 오르는 스마트폰 케이스", "내 반려동물이랑 대화 가능한 뇌파 번역기",
+    "나랑 똑같이 생긴 도플갱어 찾아주는 전 세계 검색 엔진", "맛없는 식당 가면 '맛없음' 깃발 꽂는 지도", "내 흑역사 자동으로 발굴해서 이불킥 하게 만드는 알람", "공부 안 하고 폰 만지면 전기 오르는 스마트폰 케이스", "내 반려동물이랑 대화 가능한 뇌파 번역기",
     "잠수 이별 당하면 상대방 회사에 화환 보내주는 서비스", "SNS 허세 사진 감별해주는 팩트체크 AI", "혼밥할 때 앞에 앉아서 같이 먹어주는 홀로그램 아이돌", "비 오는 날 우산 없이 뛰는 사람들 등수 매기는 스포츠", "지각 핑계 100가지 만들어주는 AI 생성기",
     "내 기분에 맞춰서 칵테일 제조해주는 텀블러", "월급날 1초 만에 스쳐 지나가는 돈 시각화해주는 AR", "상사 뒷담화하면 자동으로 익명 게시판에 올려주는 앱", "코인 노래방 점수 내기로 밥값 계산하는 결제 시스템", "내 묘비에 QR코드 박아서 인스타 링크 거는 서비스",
     "책 읽다 잠들면 자동으로 불 꺼주고 책갈피 꽂아주는 로봇", "운전 중 욱하면 차 안에서 클래식 틀어주는 내비게이션", "냉장고 유통기한 임박한 재료로 요리 대결하는 앱", "내 발 냄새 수치 측정해서 양말 교체 알림 주는 신발", "회의 중 딴짓하다 질문 받으면 답변 대신 해주는 AI",
@@ -359,12 +362,17 @@ if analyze_btn:
             score_text = extract_tag("SCORE", content, "0")
             st.session_state.score = int(re.search(r'\d+', score_text).group()) if re.search(r'\d+', score_text) else 0
             
+            # [🔥 버그 수정] 에러 발생 시 출력되는 기본값(Default)을 언어별로 분리
+            default_one_liner = "AI가 할 말을 잃었습니다." if current_lang == "ko" else "AI is speechless."
+            default_feedback = "분석 실패." if current_lang == "ko" else "Analysis failed."
+            default_data = "데이터 없음." if current_lang == "ko" else "No data."
+
             st.session_state.result_data = {
-                "one_liner": extract_tag("ONE_LINER", content, "AI가 할 말을 잃었습니다."),
-                "feedback": extract_tag("FEEDBACK", content, "분석 실패."),
-                "swot": extract_tag("SWOT", content, "데이터 없음."),
-                "money": extract_tag("MONETIZATION", content, "데이터 없음."),
-                "survival": extract_tag("SURVIVAL", content, "데이터 없음.")
+                "one_liner": extract_tag("ONE_LINER", content, default_one_liner),
+                "feedback": extract_tag("FEEDBACK", content, default_feedback),
+                "swot": extract_tag("SWOT", content, default_data),
+                "money": extract_tag("MONETIZATION", content, default_data),
+                "survival": extract_tag("SURVIVAL", content, default_data)
             }
             
             st.session_state.analyzed = True
@@ -385,12 +393,13 @@ if st.session_state.analyzed:
     
     st.divider()
     
-    # CSS 우선순위 버그를 피하기 위해 h1 태그 대신 div 태그를 사용하여 강제 빨간색 주입
-    score_color = "#FF4B4B" if score < 50 else "#00FFD1"
+    # [🔥 버그 수정] 강제 지정한 CSS 클래스를 적용하여 글로벌 CSS 간섭 완벽 차단
+    score_class = "score-red" if score < 50 else "score-green"
+    
     st.markdown(f"""
     <div class="score-card">
         <h2 style='margin:0; color:#8B949E !important; border:none;'>{ui['score_title']}</h2>
-        <div style='font-family:"JetBrains Mono", monospace; font-size:72px; font-weight:bold; margin:10px 0; color:{score_color} !important;'>{score}%</div>
+        <div class='{score_class}' style='font-family:"JetBrains Mono", monospace; font-size:72px; font-weight:bold; margin:10px 0;'>{score}%</div>
         <p style='font-size:20px; font-weight:bold; color:#FFFFFF; word-break: keep-all !important;'>"{data['one_liner']}"</p>
     </div>
     """, unsafe_allow_html=True)
