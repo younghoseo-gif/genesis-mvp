@@ -52,10 +52,15 @@ st.markdown("""
     th { background-color: #21262D !important; color: #00FFD1 !important; font-size: 16px !important; text-align: left !important; padding: 12px !important; border-bottom: 2px solid #444 !important; }
     td { font-size: 15px !important; padding: 15px 12px !important; border-bottom: 1px solid #333 !important; vertical-align: top !important; line-height: 1.6 !important; }
 
-    .stButton>button { width: 100%; border-radius: 8px; height: 55px; font-weight: 800; font-size: 18px; border: none; transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; }
-    .stButton>button:active { transform: scale(0.98); }
+    /* 버튼 및 텍스트 박스 보호색 방어 */
+    div.stButton > button { width: 100%; border-radius: 8px; height: 55px; font-weight: 800; font-size: 18px; border: none; transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; }
+    div.stButton > button:active { transform: scale(0.98); }
     .primary-btn button { background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%); color: white !important; }
     .secondary-btn button { background-color: #21262D; color: #00FFD1 !important; border: 1px solid #30363D; }
+
+    /* [🔥 버그 수정] 점수 전용 클래스를 만들어 글로벌 CSS 강제 덮어쓰기 */
+    .score-red { color: #FF4B4B !important; }
+    .score-green { color: #00FFD1 !important; }
 
     .score-card { text-align: center; padding: 30px; border-radius: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 30px; }
 
@@ -72,7 +77,7 @@ except:
     st.stop()
 
 # ------------------------------------------------------------------
-# 2. Data Decks (풀 데이터 100개씩)
+# 2. Data Decks
 # ------------------------------------------------------------------
 KR_IDEAS = [
     "헤어진 연인 사진 속 얼굴만 자연스럽게 지워주는 AI", "층간소음 발생 시 윗집 스피커 해킹하는 복수 앱", "주식 폭락할 때마다 욕해주는 위로 AI", "직장 상사 잔소리를 클래식 음악으로 변환하는 이어폰", "헬스장 안 가면 등록비가 자동으로 기부되는 시계",
@@ -244,7 +249,6 @@ if analyze_btn:
             progress_bar.progress(30)
             status_box.write(ui["analyzing"])
             
-            # [🔥 핵심 변경: 프롬프트를 언어별로 100% 완전 분리]
             if current_lang == "ko":
                 prompt = f"""
                 당신은 실리콘밸리의 가장 냉혹하고 파괴적인 비즈니스 컨설턴트(Genesis)입니다. 
@@ -358,12 +362,17 @@ if analyze_btn:
             score_text = extract_tag("SCORE", content, "0")
             st.session_state.score = int(re.search(r'\d+', score_text).group()) if re.search(r'\d+', score_text) else 0
             
+            # [🔥 버그 수정] 에러 발생 시 출력되는 기본값(Default)을 언어별로 분리
+            default_one_liner = "AI가 할 말을 잃었습니다." if current_lang == "ko" else "AI is speechless."
+            default_feedback = "분석 실패." if current_lang == "ko" else "Analysis failed."
+            default_data = "데이터 없음." if current_lang == "ko" else "No data."
+
             st.session_state.result_data = {
-                "one_liner": extract_tag("ONE_LINER", content, "AI가 할 말을 잃었습니다."),
-                "feedback": extract_tag("FEEDBACK", content, "분석 실패."),
-                "swot": extract_tag("SWOT", content, "데이터 없음."),
-                "money": extract_tag("MONETIZATION", content, "데이터 없음."),
-                "survival": extract_tag("SURVIVAL", content, "데이터 없음.")
+                "one_liner": extract_tag("ONE_LINER", content, default_one_liner),
+                "feedback": extract_tag("FEEDBACK", content, default_feedback),
+                "swot": extract_tag("SWOT", content, default_data),
+                "money": extract_tag("MONETIZATION", content, default_data),
+                "survival": extract_tag("SURVIVAL", content, default_data)
             }
             
             st.session_state.analyzed = True
@@ -384,11 +393,13 @@ if st.session_state.analyzed:
     
     st.divider()
     
-    score_color = "#FF4B4B" if score < 50 else "#00FFD1"
+    # [🔥 버그 수정] 강제 지정한 CSS 클래스를 적용하여 글로벌 CSS 간섭 완벽 차단
+    score_class = "score-red" if score < 50 else "score-green"
+    
     st.markdown(f"""
     <div class="score-card">
         <h2 style='margin:0; color:#8B949E !important; border:none;'>{ui['score_title']}</h2>
-        <h1 style='font-size:72px; margin:10px 0; color:{score_color} !important;'>{score}%</h1>
+        <div class='{score_class}' style='font-family:"JetBrains Mono", monospace; font-size:72px; font-weight:bold; margin:10px 0;'>{score}%</div>
         <p style='font-size:20px; font-weight:bold; color:#FFFFFF; word-break: keep-all !important;'>"{data['one_liner']}"</p>
     </div>
     """, unsafe_allow_html=True)
