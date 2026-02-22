@@ -8,9 +8,10 @@ import re
 # ------------------------------------------------------------------
 # 1. Page Config & 철벽 테마 방어
 # ------------------------------------------------------------------
-st.set_page_config(page_title="Genesis: Business Roast", page_icon="🔥", layout="centered")
+# [이름 변경] 브라우저 탭 타이틀 변경
+st.set_page_config(page_title="Validatix MVP", page_icon="🔥", layout="centered")
 
-# [🔥 Step 4: 실전 배포를 위한 개발자 모드 OFF (결제창 철벽 가동) 🔥]
+# [🔥 실전 배포를 위한 개발자 모드 OFF (결제창 철벽 가동) 🔥]
 dev_mode = False 
 
 KAKAO_LINK = "https://bit.ly/3MavCUX"
@@ -58,7 +59,7 @@ st.markdown("""
     .primary-btn button { background: linear-gradient(90deg, #FF4B4B 0%, #FF9068 100%); color: white !important; }
     .secondary-btn button { background-color: #21262D; color: #00FFD1 !important; border: 1px solid #30363D; }
 
-    /* [🔥 버그 수정] 점수 전용 클래스를 만들어 글로벌 CSS 강제 덮어쓰기 */
+    /* 점수 전용 클래스를 만들어 글로벌 CSS 강제 덮어쓰기 */
     .score-red { color: #FF4B4B !important; }
     .score-green { color: #00FFD1 !important; }
 
@@ -148,14 +149,14 @@ def pick_random_idea(lang):
 def get_ui_text(lang_code):
     text_pack = {
         "ko": {
-            "main_title": "Genesis 🔥",
+            "main_title": "Validatix MVP 🔥", # [이름 변경] 
             "sub_title": "AI가 당신의 사업 아이디어를 팩트로 폭행합니다.",
             "input_label": "아이디어 입력",
             "input_placeholder": "예: 직장인 점심 메뉴 추천 서비스",
             "analyze_btn": "🔥 팩트 폭력 당하기 (분석)",
             "random_btn": "🎲 예시 아이디어 넣기", 
             "warning": "아이디어를 입력하세요.",
-            "connecting": "🧠 Genesis Brain 접속 중...",
+            "connecting": "🧠 Validatix Brain 접속 중...", # [이름 변경] 
             "analyzing": "🔍 아이디어 해부 중...",
             "calculating": "💰 수익 모델 계산 중...",
             "score_title": "생존 확률",
@@ -174,7 +175,7 @@ def get_ui_text(lang_code):
             "unlock_btn": "👉 카톡으로 문의하기",
         },
         "en": {
-            "main_title": "Genesis 🔥",
+            "main_title": "Validatix MVP 🔥", # [이름 변경] 
             "sub_title": "AI roasts your business idea with brutal facts.",
             "input_label": "Enter Idea",
             "input_placeholder": "e.g., AI dating coach",
@@ -251,7 +252,7 @@ if analyze_btn:
             
             if current_lang == "ko":
                 prompt = f"""
-                당신은 실리콘밸리의 가장 냉혹하고 파괴적인 비즈니스 컨설턴트(Genesis)입니다. 
+                당신은 실리콘밸리의 가장 냉혹하고 파괴적인 비즈니스 컨설턴트(Validatix)입니다. 
                 사용자 아이디어: "{user_text}"
                 
                 [절대 규칙]
@@ -300,7 +301,7 @@ if analyze_btn:
                 """
             else:
                 prompt = f"""
-                You are Genesis, the most ruthless and destructive business consultant in Silicon Valley.
+                You are Validatix, the most ruthless and destructive business consultant in Silicon Valley.
                 User Idea: "{user_text}"
                 
                 [CRITICAL RULE]
@@ -362,7 +363,6 @@ if analyze_btn:
             score_text = extract_tag("SCORE", content, "0")
             st.session_state.score = int(re.search(r'\d+', score_text).group()) if re.search(r'\d+', score_text) else 0
             
-            # [🔥 버그 수정] 에러 발생 시 출력되는 기본값(Default)을 언어별로 분리
             default_one_liner = "AI가 할 말을 잃었습니다." if current_lang == "ko" else "AI is speechless."
             default_feedback = "분석 실패." if current_lang == "ko" else "Analysis failed."
             default_data = "데이터 없음." if current_lang == "ko" else "No data."
@@ -393,7 +393,6 @@ if st.session_state.analyzed:
     
     st.divider()
     
-    # [🔥 버그 수정] 강제 지정한 CSS 클래스를 적용하여 글로벌 CSS 간섭 완벽 차단
     score_class = "score-red" if score < 50 else "score-green"
     
     st.markdown(f"""
@@ -468,7 +467,7 @@ if st.session_state.analyzed:
 st.markdown("---")
 st.markdown("""
     <div style="text-align: center; color: #666; font-size: 12px; padding-bottom: 50px;">
-        <p>Copyright © 2026 Genesis AI. All rights reserved.</p>
+        <p>Copyright © 2026 Validatix MVP. All rights reserved.</p>
         <p>Contact: <a href="mailto:seotony77@gmail.com" style="color: #888;">seotony77@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
