@@ -365,7 +365,19 @@ if analyze_btn:
                 )
                 """
             
-            response = model.generate_content(prompt, safety_settings=safety_settings)
+            # [🔥 구글 서버 500 에러 방어: 3회 강제 재시도 로직]
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    response = model.generate_content(prompt, safety_settings=safety_settings)
+                    break  # 성공 시 루프 탈출
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        time.sleep(2)  # 구글 서버가 뻗으면 2초 대기 후 재시도
+                        continue
+                    else:
+                        raise e  # 3회 모두 실패 시 에러 송출
+            
             progress_bar.progress(80)
             status_box.write(ui["calculating"])
             
