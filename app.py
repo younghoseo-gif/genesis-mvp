@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+import streamlit.components.v1 as components
 import time
 import urllib.parse
 import random
@@ -9,6 +10,22 @@ import re
 # 1. Page Config & 철벽 테마 방어
 # ------------------------------------------------------------------
 st.set_page_config(page_title="Validatix MVP", page_icon="🔥", layout="centered")
+
+# [🔥 GA4 글로벌 트래픽 추적 센서 이식 (Phase 6)]
+GA_ID = "G-S394GDYE1R"
+GA_SCRIPT = f"""
+<script type="text/javascript">
+    var gtagScript = window.parent.document.createElement('script');
+    gtagScript.async = true;
+    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id={GA_ID}';
+    window.parent.document.head.appendChild(gtagScript);
+
+    var gtagInit = window.parent.document.createElement('script');
+    gtagInit.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){{dataLayer.push(arguments);}} gtag('js', new Date()); gtag('config', '{GA_ID}');";
+    window.parent.document.head.appendChild(gtagInit);
+</script>
+"""
+components.html(GA_SCRIPT, width=0, height=0)
 
 # [🔥 실전 배포를 위한 개발자 모드 OFF (결제창 철벽 가동) 🔥]
 dev_mode = False 
@@ -411,7 +428,7 @@ if st.session_state.analyzed:
         share_text = urllib.parse.quote(ui['share_msg'].format(score=score, one_liner=data['one_liner']))
         st.markdown(f"""
         <br>
-        <a href="https://twitter.com/intent/tweet?text={share_text}&url=https://genesis-mvp.streamlit.app" target="_blank" style="text-decoration:none;">
+        <a href="https://twitter.com/intent/tweet?text={share_text}&url=https://validatix-mvp.streamlit.app" target="_blank" style="text-decoration:none;">
             <button style='background:#1DA1F2; color:white; border:none; padding:12px 24px; border-radius:30px; font-weight:bold; cursor:pointer; width:100%;'>
                 {ui['share_btn']}
             </button>
